@@ -2,19 +2,25 @@ CC=gcc
 
 CCFLAGS=-D_DEFAULT_SOURCE -D_XOPEN_SOURCE -D_BSD_SOURCE -std=c11 -pedantic -Wvla -Wall -Werror
 
-ALL= server client
+ALL= zombie controller labo
 
 all: $(ALL)
 
-server : server.o utils_v2.o
-	$(CC) $(CCFLAGS) -o server server.o utils_v2.o
-server.o: server.c messages.h
-	$(CC) $(CCFLAGS) -c server.c
+zombie : zombie.o utils_v2.o
+	$(CC) $(CCFLAGS) -o zombie zombie.o utils_v2.o
+zombie.o: zombie.c commandes.h
+	$(CC) $(CCFLAGS) -c zombie.c
 
-client : client.o utils_v2.o
-	$(CC) $(CCFLAGS) -o client client.o utils_v2.o
-client.o: client.c messages.h
-	$(CC) $(CCFLAGS) -c client.c
+controller : controller.o utils_v2.o
+	$(CC) $(CCFLAGS) -o controller controller.o utils_v2.o
+controller.o: controller.c commandes.h
+	$(CC) $(CCFLAGS) -c controller.c
+
+labo : labo.o utils_v2
+	$(CC) $(CCFLAGS) -o labo labo.o utils_v2.o
+
+labo.o : labo.c commandes.h
+	$(CC) $(CCFLAGS) -c labo.c 
 
 utils_v2.o: utils_v2.c utils_v2.h
 	$(CC) $(CCFLAGS) -c utils_v2.c
