@@ -8,18 +8,18 @@ all: $(ALL)
 
 zombie : zombie.o utils_v2.o
 	$(CC) $(CCFLAGS) -o zombie zombie.o utils_v2.o
-zombie.o: zombie.c commandes.h
+zombie.o: zombie.c messages.h
 	$(CC) $(CCFLAGS) -c zombie.c
 
 controller : controller.o utils_v2.o
 	$(CC) $(CCFLAGS) -o controller controller.o utils_v2.o
-controller.o: controller.c commandes.h
+controller.o: controller.c messages.h
 	$(CC) $(CCFLAGS) -c controller.c
 
-labo : labo.o utils_v2
+labo : labo.o utils_v2.o
 	$(CC) $(CCFLAGS) -o labo labo.o utils_v2.o
 
-labo.o : labo.c commandes.h
+labo.o : labo.c messages.h
 	$(CC) $(CCFLAGS) -c labo.c 
 
 utils_v2.o: utils_v2.c utils_v2.h
