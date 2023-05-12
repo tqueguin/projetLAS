@@ -41,6 +41,17 @@ int initSocketServer(int serverPort)
   return sockfd;
 }
 
+void childProcess() {
+  // traitement sous-processus
+  // prend la commande en mémoire partagé
+  // sopen pour créer un fichier
+  // nwrite char* shebang = "#!/bin/bash\n";
+  // nwrite commande dans fichier
+  // sclose file descriptor
+  // exec le fichier. Peut-être fork ça, à voir.
+  // envoyer réponse
+} 
+
 
 
 int main(int argc, char **argv)
@@ -55,10 +66,14 @@ int main(int argc, char **argv)
 	// setsockopt -> to avoid Address Already in Use
   	int option = 1;
   	setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(int));
+
+  sig_t childpid = sfork_and_run0(childProcess);
+
+  
 	
 	while (!end)
   {
-
+    // traitement parent
     /* client trt */
     int newsockfd = accept(sockfd, NULL, NULL);
    
@@ -78,6 +93,8 @@ int main(int argc, char **argv)
 
   
   }
+
+
   
   
   sclose(sockfd);

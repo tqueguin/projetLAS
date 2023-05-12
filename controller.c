@@ -20,6 +20,7 @@
  */
 int initSocketClient(char * serverIP, int serverPort)
 {
+  // boucle pour tester les ports
   int sockfd = ssocket();
   sconnect(serverIP, serverPort, sockfd);
   return sockfd;
@@ -44,6 +45,13 @@ int main(int argc, char **argv)
   {
     printf("Réponse du serveur : Inscription acceptée\n");
   }
+
+  // sread(1, nom, nbchar) pour lire le contenu sur la sortie standard
+  // POLLIN pour éviter que sread ne bloque d'autres sread
+  // fork_and_run0(lireReponse);
+
+  // traitement parent envoyer les commandes
+
  
 
   sclose(sockfd);
