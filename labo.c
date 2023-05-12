@@ -1,10 +1,5 @@
 #include <stdio.h>
 int main() {
-   // printf() displays the string inside quotation
-   printf("Hello, World!");
-   return 0;
-
-   
 
    while ((char n = read()) != EOF) {
       // boucle 2 fois exec zombie.c
@@ -12,5 +7,7 @@ int main() {
 
    }
    //sigkill ou sigterm aux 2 zombies
+
+   return 0;
 }
 
