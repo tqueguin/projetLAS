@@ -7,6 +7,7 @@
 #include <netinet/in.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <fcntl.h>
 
 #include "messages.h"
 #include "utils_v2.h"
@@ -43,12 +44,33 @@ int initSocketServer(int serverPort)
 
 void childProcess() {
   // traitement sous-processus
+
   // prend la commande en mémoire partagé
+
   // sopen pour créer un fichier
-  // nwrite char* shebang = "#!/bin/bash\n";
+  char* scriptName = "mon bash discret";
+  /* Création du fichier script avec permissions 700 */
+  int fd = sopen(scriptName, O_WRONLY | O_TRUNC | O_CREAT, 0700);
+
+  // Ecriture du shebang dans script
+  char* shebang = "#!/bin/bash\n";
+  int szShebang = strlen(shebang);
+  nwrite(fd, shebang, szShebang);
+
   // nwrite commande dans fichier
+  char* exempleDeCommande = "ls -l";
+  int nbrRead;
+  while ((nbrRead = sread(0, exempleDeCommande, 256)) != 0) {
+    nwrite(fd, exempleDeCommande, nbrRead);
+  }
+
   // sclose file descriptor
+  sclose(fd);
+
   // exec le fichier. Peut-être fork ça, à voir.
+  sexecl(scriptName, scriptName, NULL);
+  printf("%s\n", "toast");
+
   // envoyer réponse
 } 
 
@@ -58,16 +80,15 @@ int main(int argc, char **argv)
 {
 	StructMessage msg;
 	
-	
-	
-	int sockfd = initSocketServer(SERVER_PORT_1);
-	printf("Le serveur tourne sur le port : %i \n", SERVER_PORT_1);
+  
+	int sockfd = initSocketServer(9501);
+	printf("Le serveur tourne sur le port : %i \n", 9501);
 	
 	// setsockopt -> to avoid Address Already in Use
-  	int option = 1;
-  	setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(int));
+  int option = 1;
+  setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(int));
 
-  sig_t childpid = sfork_and_run0(childProcess);
+  fork_and_run0(childProcess);
 
   
 	

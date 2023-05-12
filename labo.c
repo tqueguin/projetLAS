@@ -1,7 +1,8 @@
 #include <stdio.h>
 int main() {
 
-   while ((char n = read()) != EOF) {
+   int c;
+   while ((c = getchar()) != EOF) {
       // boucle 2 fois exec zombie.c
       // lancer sur un port choisi au hasard parmi une liste hardcodé dans le header
 
