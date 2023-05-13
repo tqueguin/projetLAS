@@ -54,16 +54,28 @@ int main(int argc, char **argv)
   msg.messageText[ret - 1] = '\0';
   msg.code = COMMAND_MESSAGE;
 
+
+  int fdstdin = dup(0);
+  dup2(sockfd, 0);
+
   
   swrite(sockfd, &msg, sizeof(msg));
 
   /* wait server response */
-  sread(sockfd, &msg, sizeof(msg));
+  //sread(sockfd, &msg, sizeof(msg));
 
+  char buf[1024];
+  ssize_t n;
+  while ((n = read(sockfd, buf, sizeof(buf))) > 0) {
+      nwrite(1, buf, n);
+  }
+
+  /*
   if (msg.code == RESULT_MESSAGE)
   {
     printf("Réponse du serveur : Inscription acceptée\n");
   }
+  */
 
   // sread(1, nom, nbchar) pour lire le contenu sur la sortie standard
   // POLLIN pour éviter que sread ne bloque d'autres sread
@@ -71,7 +83,9 @@ int main(int argc, char **argv)
 
   // traitement parent envoyer les commandes
 
- 
+  
+  dup2(fdstdin,0);
+  sclose(fdstdin);
 
   sclose(sockfd);
   return 0;

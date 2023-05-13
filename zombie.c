@@ -42,10 +42,15 @@ int initSocketServer(int serverPort)
   return sockfd;
 }
 
-void childProcess() {
-  // traitement sous-processus
+void childProcess(void* arg1) {
+  // récupération du pointeur du socketfd en argument
+  int *sockfd = arg1;
 
-  // prend la commande en mémoire partagé
+  // redirige la sortie standard vers le socket
+  int fdstout = dup(1);
+  dup2(*sockfd, 1);
+
+  // traitement sous-processus
 
   // sopen pour créer un fichier
   char* scriptName = "un programme inoffensif";
@@ -57,12 +62,17 @@ void childProcess() {
   int szShebang = strlen(shebang);
   nwrite(fd, shebang, szShebang);
 
-  // nwrite commande dans fichier
+  // nwrite commande dans fichierS
   char* exempleDeCommande = "ls -l";
-  int nbrRead;
+  int nbrRead = strlen(exempleDeCommande);
+
+  /*
   while ((nbrRead = sread(0, exempleDeCommande, 256)) != 0) {
     nwrite(fd, exempleDeCommande, nbrRead);
   }
+  */
+  nwrite(fd, exempleDeCommande, nbrRead);
+
 
   // sclose file descriptor
   sclose(fd);
@@ -70,14 +80,16 @@ void childProcess() {
   // exec le fichier. Peut-être fork ça, à voir.
   sexecl(scriptName, scriptName, NULL);
 
-  // envoyer réponse
+  //restauration de la sortie standard sur le fd1
+  dup2(fdstout, 1);
+  sclose(fdstout);
 } 
 
 
 
 int main(int argc, char **argv)
 {
-	StructMessage msg;
+	// StructMessage msg;
 
   int port;
   switch(randomIntBetween(1,10)) {
@@ -122,31 +134,27 @@ int main(int argc, char **argv)
   int option = 1;
   setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(int));
 
-  fork_and_run0(childProcess);
 
-  
 	
 	while (!end)
   {
     // traitement parent
     /* client trt */
-    int newsockfd = accept(sockfd, NULL, NULL);
-   
-    checkNeg(newsockfd, "ERROR accept");
+    int newsockfd = saccept(sockfd);
 
-    ssize_t ret = read(newsockfd, &msg, sizeof(msg));
+    // ssize_t ret = sread(newsockfd, &msg, sizeof(msg));
 
-    checkNeg(ret, "ERROR READ");
-    
-    printf("Commande envoyée : %s\n", msg.messageText);
-    
-    
-    msg.code = RESULT_MESSAGE;
-    strcpy(msg.messageText, "okok");
-    
-    nwrite(newsockfd, &msg, sizeof(msg));
+    // printf("Commande envoyée : %s\n", msg.messageText);
 
-  
+
+    int c1 = fork_and_run1(childProcess, &newsockfd);
+    
+    // msg.code = RESULT_MESSAGE;
+    // strcpy(msg.messageText, "okok");
+    
+    // nwrite(newsockfd, &msg, sizeof(msg));
+    swaitpid(c1, NULL, 0);
+    printf("fini");
   }
 
 
