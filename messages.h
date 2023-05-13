@@ -1,17 +1,18 @@
 #ifndef _MESSAGES_H_
 #define _MESSAGES_H_
 
-#define SERVER_IP "127.0.0.1" /* localhost */
+#define SERVER_PORT_1 9501
+#define SERVER_PORT_2 9502
+#define SERVER_PORT_3 9503
+#define SERVER_PORT_4 9504
+#define SERVER_PORT_5 9505
+#define SERVER_PORT_6 9506
+#define SERVER_PORT_7 9507
+#define SERVER_PORT_8 9508
+#define SERVER_PORT_9 9509
+#define SERVER_PORT_10 9510
+
 #define MAX_LENGTH 256
-
-
-/* Possible server ports */
-typedef enum
-{
-  SERVER_PORT_1 = 9501, SERVER_PORT_2, SERVER_PORT_3, SERVER_PORT_4,
-  SERVER_PORT_5, SERVER_PORT_6, SERVER_PORT_7, SERVER_PORT_8, SERVER_PORT_9,
-  SERVER_PORT_10
-} Port;
 
 
 typedef enum

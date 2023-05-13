@@ -12,30 +12,49 @@
 #include "utils_v2.h"
 
 /**
- * PRE: serverIP : a valid IP address
- *      serverPort: a valid port number
- * POST: on success, connects a client socket to serverIP:serverPort
- *       on failure, displays error cause and quits the program
- * RES: return socket file descriptor
+ * Returns sockfd or a negative number if there was an error creating the connection.
  */
 int initSocketClient(char * serverIP, int serverPort)
 {
-  // boucle pour tester les ports
   int sockfd = ssocket();
-  sconnect(serverIP, serverPort, sockfd);
+  struct sockaddr_in addr;
+  memset(&addr,0,sizeof(addr)); /* en System V */
+  addr.sin_family = AF_INET;
+  addr.sin_port = htons(serverPort);
+  inet_aton(serverIP,&addr.sin_addr);
+  int ret = connect(sockfd, (struct sockaddr *) &addr, sizeof(addr));
+  if(ret < 0) return ret;
   return sockfd;
 }
 
 
 int main(int argc, char **argv)
 {
+  char* serverIP = argv[0];
+
+  int possiblePorts[10] = {SERVER_PORT_1, SERVER_PORT_2, SERVER_PORT_3, SERVER_PORT_4, 
+        SERVER_PORT_5, SERVER_PORT_6, SERVER_PORT_7, SERVER_PORT_8,
+        SERVER_PORT_9, SERVER_PORT_10};
+
+  int sockfd;
+  int port;
+
+  // Essai de tous les ports possibles
+    for(int i = 0; i < 10; i++){
+        port = possiblePorts[i];
+        sockfd = initSocketClient(serverIP, port);
+        if(sockfd > 0) break;
+    }
+    printf("Zombie trouvé sur le port %d \n\n", port);
+
+
   printf("Entrez une commande à envoyer au(x) zombie(s) :\n");
   StructMessage msg;
   int ret = sread(0, msg.messageText, MAX_LENGTH);
   msg.messageText[ret - 1] = '\0';
   msg.code = COMMAND_MESSAGE;
 
-  int sockfd = initSocketClient(SERVER_IP, SERVER_PORT_1);
+  
   swrite(sockfd, &msg, sizeof(msg));
 
   /* wait server response */

