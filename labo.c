@@ -1,11 +1,17 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <signal.h>
+
 #include "messages.h"
+#include "utils_v2.h"
 
 
 
-void exitHandler(int sig)
+void childhandler(int port)
 {
-	end = 1;
+	char *args[]={"./zombie",port,NULL};
+ 	execvp(args[0],args);
 }
 
 int main(int argc, char **argv)
@@ -21,17 +27,19 @@ int tab_size = 10;
 
 srand(time(NULL));
 
-int port = 0;
-int rand_port = 1;
 
+int port_pris = -1;
 for(int i = 0;i<2;i++){
 
-	while(port = rand_port){
-    	rand_port = possiblePorts[rand() % tab_size];
-	}
-	port = rand_port;
- 	char *args[]={"./zombie",rand_port,NULL};
- 	execvp(args[0],args);
+
+    rand_port = possiblePorts[rand() % tab_size];
+    	while(port_pris = rand_port){
+    		rand_port = possiblePorts[rand() % tab_size];
+    	}
+    port_pris = rand_port;
+    pid_t childID = fork_and_run0(childhandler,rand_port);
+    kill(childID, NULL);
+ 	
 
  }
    
