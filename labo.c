@@ -1,14 +1,26 @@
 #include <stdio.h>
-int main() {
+#include "utils_v2.h"
 
+#define NUMBER_OF_ZOMBIES 2
+
+void launchZombie(){
+   sexecl("./zombie", "zombie", NULL);
+}
+
+int main() {
+   int zombies[NUMBER_OF_ZOMBIES];
    int c;
    while ((c = getchar()) != EOF) {
-      // boucle 2 fois exec zombie.c
-      // lancer sur un port choisi au hasard parmi une liste hardcodé dans le header
+      for(int i = 0; i<NUMBER_OF_ZOMBIES;i++){
+         zombies[i] = fork_and_run0(launchZombie);
+      }
 
    }
-   //sigkill ou sigterm aux 2 zombies
 
+   for(int i = 0; i<NUMBER_OF_ZOMBIES; i++){
+      skill(zombies[i], SIGINT);
+   }
+   
    return 0;
 }
 
