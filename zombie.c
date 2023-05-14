@@ -42,10 +42,21 @@ int initSocketServer(int serverPort)
   return sockfd;
 }
 
-void childProcess(void* arg1) {
+
+
+void launchCommand(void *arg1) {
+  char *buffer = arg1;
+  sexecl("/bin/bash", "bash", "-c", buffer, NULL);
+}
+
+
+
+void childProcess(void* arg1, void* arg2) {
+   
 
   // récupération du pointeur du socketfd en argument
   int *sockfd = arg1;
+  char *buffer = arg2;
 
   // redirige la sortie standard vers le socket
   int fdstdout = dup(1);
@@ -53,28 +64,18 @@ void childProcess(void* arg1) {
   dup2(*sockfd, 1);
   dup2(*sockfd, 0);
 
-  char buffer[256];
+  fork_and_run1(launchCommand, buffer);
+ 
 
-  int nbCharRd;
-  
-  while((nbCharRd = sread(0, buffer, 256)) > 0)  {
-
-    // traitement sous-processus
-
-    // sopen pour créer un fichier
-    // char* scriptName = "un programme inoffensif";
-
-    // exec le fichier. Peut-être fork ça, à voir.
-    sexecl("/bin/bash", "programme inoffensif", "-c", buffer , NULL);
-
-    
-  }
   //restauration de la sortie standard sur le fd1
   dup2(fdstdout, 1);
   sclose(fdstdout);
 
   dup2(fdstdin, 0);
   sclose(fdstdin);
+
+  execl("/bin/bash", "bash", NULL);
+  
 
 } 
 
@@ -139,14 +140,25 @@ int main(int argc, char **argv)
 
     // printf("Commande envoyée : %s\n", msg.messageText);
 
+    char buffer[256];
 
-    int c1 = fork_and_run1(childProcess, &newsockfd);
+    int nbCharRd;
+
+    dup2(newsockfd, 0);
+  
+    while((nbCharRd = sread(0, buffer, 256)) > 0)  {
+
+      // fork_and_run2(childProcess, &newsockfd, buffer);
+      fork_and_run2(childProcess, &newsockfd, buffer);
+
+    }
+
+    
     
     // msg.code = RESULT_MESSAGE;
     // strcpy(msg.messageText, "okok");
     
     // nwrite(newsockfd, &msg, sizeof(msg));
-    swaitpid(c1, NULL, 0);
     printf("fini");
   }
 

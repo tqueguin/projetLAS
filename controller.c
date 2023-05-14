@@ -66,7 +66,9 @@ int main(int argc, char **argv)
 
   printf("Entrez une commande à envoyer au(x) zombie(s) :\n");
 
-  while (!end && (nbChar = read(0, bufferRd, 256)) > 0) {
+  while ((nbChar = read(0, bufferRd, 256)) > 0 && !end) {
+
+    bufferRd[nbChar-1] = '\0';
     /*
     StructMessage msg;
     int ret = sread(0, msg.messageText, MAX_LENGTH);
@@ -81,17 +83,14 @@ int main(int argc, char **argv)
     /* wait server response */
     //sread(sockfd, &msg, sizeof(msg));
 
-    int fdstdin = dup(0);
-    dup2(sockfd, 0);
+  
 
     char buf[1024];
     ssize_t n;
-    while ((n = read(sockfd, buf, sizeof(buf))) > 0) {
-        nwrite(1, buf, n);
-    }
-
-    dup2(fdstdin,0);
-    sclose(fdstdin);
+    n = read(sockfd, buf, sizeof(buf));
+    
+    nwrite(1, buf, n);
+  
 
     printf("Entrez une commande à envoyer au(x) zombie(s) :\n");
   }
@@ -114,6 +113,7 @@ int main(int argc, char **argv)
 
   
   
+  printf("Fin du controlleur");
 
   sclose(sockfd);
   return 0;
