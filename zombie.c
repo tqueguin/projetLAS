@@ -54,35 +54,6 @@ int initSocketClient(char ServerIP[16], int Serverport)
   return sockfd;
 }
 
-/*
-void launchCommand(void *arg1) {
-  char *buffer = arg1;
-
-  if (strncmp(buffer, "curl", 4) == 0) {
-      char ip[18];
-      hostname_to_ip(WEB_SERVER, ip);
-
-      char url[BUFFER_SIZE];
-      sprintf(url, "%s", strrchr(buffer, ' ') + 1);
-
-      int websockfd = initSocketClient(ip, WEB_SERVER_PORT);
-      char request[2 * BUFFER_SIZE];
-      sprintf(request, "GET %s HTTP/1.0\r\nHost: %s\r\n\r\n", url, WEB_SERVER);
-      swrite(websockfd, request, strlen(request));
-
-      char response[BUFFER_SIZE];
-      size_t nbChar;
-      while ((nbChar = sread(websockfd, response, BUFFER_SIZE)) > 0)
-      {
-        nwrite(1, response, nbChar);
-      }
-      sclose(websockfd);
-
-  } else {
-    sexecl("/bin/bash", "bash", "-c", buffer, NULL);
-  }
-}
-*/
 
 
 void childProcess(void* arg1) {
@@ -91,25 +62,7 @@ void childProcess(void* arg1) {
   // récupération du pointeur du socketfd en argument
   int *sockfd = arg1;
 
-  // redirige la sortie standard vers le socket
-  /*
-  int fdstdout = dup(1);
-  int fdstdin = dup(0);
-  dup2(*sockfd, 1);
-  dup2(*sockfd, 0);
-
-  fork_and_run1(launchCommand, buffer);
  
-
-  //restauration de la sortie standard sur le fd1
-  */
-  /*
-  dup2(fdstdout, 1);
-  sclose(fdstdout);
-
-  dup2(fdstdin, 0);
-  sclose(fdstdin);
-  */
 
   dup2(*sockfd, 1);
   dup2(*sockfd, 0);
@@ -180,34 +133,9 @@ int main(int argc, char **argv)
 	
 	while (!end)
   {
-    // traitement parent
-    /* client trt */
     
-
-    
-
-    // ssize_t ret = sread(newsockfd, &msg, sizeof(msg));
-
-    // printf("Commande envoyée : %s\n", msg.messageText);
-
     sleep(1);
 
-    /*
-  
-    while((nbCharRd = sread(0, buffer, 256)) > 0)  {
-
-      
-      // fork_and_run2(childProcess, &newsockfd, buffer);
-      fork_and_run2(childProcess, &newsockfd, buffer);
-      
-
-    }
-    */
-    
-    // msg.code = RESULT_MESSAGE;
-    // strcpy(msg.messageText, "okok");
-    
-    // nwrite(newsockfd, &msg, sizeof(msg));
     
   }
 
