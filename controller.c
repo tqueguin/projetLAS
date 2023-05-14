@@ -39,7 +39,7 @@ int initSocketClient(char * serverIP, int serverPort)
 
 int main(int argc, char **argv)
 {
-  char* serverIP = argv[0];
+  char* serverIP = argv[1];
 
   int possiblePorts[10] = {SERVER_PORT_1, SERVER_PORT_2, SERVER_PORT_3, SERVER_PORT_4, 
         SERVER_PORT_5, SERVER_PORT_6, SERVER_PORT_7, SERVER_PORT_8,
