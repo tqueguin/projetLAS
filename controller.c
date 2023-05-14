@@ -11,6 +11,15 @@
 #include "messages.h"
 #include "utils_v2.h"
 
+
+volatile sig_atomic_t end = 0;
+
+void endControllerHandler(int sig)
+{
+  end = 1;
+}
+
+
 /**
  * Returns sockfd or a negative number if there was an error creating the connection.
  */
@@ -40,35 +49,55 @@ int main(int argc, char **argv)
   int port;
 
   // Essai de tous les ports possibles
-    for(int i = 0; i < 10; i++){
-        port = possiblePorts[i];
-        sockfd = initSocketClient(serverIP, port);
-        if(sockfd > 0) break;
-    }
-    printf("Zombie trouvé sur le port %d \n\n", port);
+  for(int i = 0; i < 10; i++){
+      port = possiblePorts[i];
+      sockfd = initSocketClient(serverIP, port);
+      if(sockfd > 0) break;
+  }
+  printf("Zombie trouvé sur le port %d \n\n", port);
 
+  // armement du signal SIGINT (ctrl-c)
+  ssigaction(SIGINT, endControllerHandler);
+
+
+
+  int nbChar;
+  int bufferRd[256];
 
   printf("Entrez une commande à envoyer au(x) zombie(s) :\n");
-  StructMessage msg;
-  int ret = sread(0, msg.messageText, MAX_LENGTH);
-  msg.messageText[ret - 1] = '\0';
-  msg.code = COMMAND_MESSAGE;
 
+  while (!end && (nbChar = read(0, bufferRd, 256)) > 0) {
+    /*
+    StructMessage msg;
+    int ret = sread(0, msg.messageText, MAX_LENGTH);
+    msg.messageText[ret - 1] = '\0';
+    msg.code = COMMAND_MESSAGE;
+    
+    swrite(sockfd, &msg, sizeof(msg));
+    */
 
-  int fdstdin = dup(0);
-  dup2(sockfd, 0);
+    swrite(sockfd, bufferRd, nbChar);
+
+    /* wait server response */
+    //sread(sockfd, &msg, sizeof(msg));
+
+    int fdstdin = dup(0);
+    dup2(sockfd, 0);
+
+    char buf[1024];
+    ssize_t n;
+    while ((n = read(sockfd, buf, sizeof(buf))) > 0) {
+        nwrite(1, buf, n);
+    }
+
+    dup2(fdstdin,0);
+    sclose(fdstdin);
+
+    printf("Entrez une commande à envoyer au(x) zombie(s) :\n");
+  }
+
 
   
-  swrite(sockfd, &msg, sizeof(msg));
-
-  /* wait server response */
-  //sread(sockfd, &msg, sizeof(msg));
-
-  char buf[1024];
-  ssize_t n;
-  while ((n = read(sockfd, buf, sizeof(buf))) > 0) {
-      nwrite(1, buf, n);
-  }
 
   /*
   if (msg.code == RESULT_MESSAGE)
@@ -84,8 +113,7 @@ int main(int argc, char **argv)
   // traitement parent envoyer les commandes
 
   
-  dup2(fdstdin,0);
-  sclose(fdstdin);
+  
 
   sclose(sockfd);
   return 0;

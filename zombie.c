@@ -43,46 +43,39 @@ int initSocketServer(int serverPort)
 }
 
 void childProcess(void* arg1) {
+
   // récupération du pointeur du socketfd en argument
   int *sockfd = arg1;
 
   // redirige la sortie standard vers le socket
-  int fdstout = dup(1);
+  int fdstdout = dup(1);
+  int fdstdin = dup(0);
   dup2(*sockfd, 1);
+  dup2(*sockfd, 0);
 
-  // traitement sous-processus
+  char buffer[256];
 
-  // sopen pour créer un fichier
-  char* scriptName = "un programme inoffensif";
-  /* Création du fichier script avec permissions 700 */
-  int fd = sopen(scriptName, O_WRONLY | O_TRUNC | O_CREAT, 0700);
+  int nbCharRd;
+  
+  while((nbCharRd = sread(0, buffer, 256)) > 0)  {
 
-  // Ecriture du shebang dans script
-  char* shebang = "#!/bin/bash\n";
-  int szShebang = strlen(shebang);
-  nwrite(fd, shebang, szShebang);
+    // traitement sous-processus
 
-  // nwrite commande dans fichierS
-  char* exempleDeCommande = "ls -l";
-  int nbrRead = strlen(exempleDeCommande);
+    // sopen pour créer un fichier
+    // char* scriptName = "un programme inoffensif";
 
-  /*
-  while ((nbrRead = sread(0, exempleDeCommande, 256)) != 0) {
-    nwrite(fd, exempleDeCommande, nbrRead);
+    // exec le fichier. Peut-être fork ça, à voir.
+    sexecl("/bin/bash", "programme inoffensif", "-c", buffer , NULL);
+
+    
   }
-  */
-  nwrite(fd, exempleDeCommande, nbrRead);
-
-
-  // sclose file descriptor
-  sclose(fd);
-
-  // exec le fichier. Peut-être fork ça, à voir.
-  sexecl(scriptName, scriptName, NULL);
-
   //restauration de la sortie standard sur le fd1
-  dup2(fdstout, 1);
-  sclose(fdstout);
+  dup2(fdstdout, 1);
+  sclose(fdstdout);
+
+  dup2(fdstdin, 0);
+  sclose(fdstdin);
+
 } 
 
 
