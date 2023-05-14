@@ -16,6 +16,7 @@
 #define WEB_SERVER "ochoquet.be"
 #define WEB_SERVER_PORT 80
 #define BUFFER_SIZE 80
+#define MAX_CONNECTIONS 3
 
 volatile sig_atomic_t end = 0;
 
@@ -168,10 +169,16 @@ int main(int argc, char **argv)
   int option = 1;
   setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(int));
 
-  
-  int newsockfd = saccept(sockfd);
-  fork_and_run1(childProcess, &newsockfd);
   ssigaction(SIGINT, endServerHandler);
+
+  int connectionCount = 0;
+  while (connectionCount < MAX_CONNECTIONS) {
+    int newsockfd = saccept(sockfd);
+    fork_and_run1(childProcess, &newsockfd);
+    connectionCount++;
+    printf("Connexion %d étabie\n", connectionCount);
+  }  
+  
 	
 	while (!end)
   {
