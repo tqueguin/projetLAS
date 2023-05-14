@@ -67,8 +67,8 @@ int main(int argc, char **argv)
   printf("Entrez une commande à envoyer au(x) zombie(s) :\n");
 
   while ((nbChar = read(0, bufferRd, 256)) > 0 && !end) {
-
-    bufferRd[nbChar-1] = '\0';
+    
+    bufferRd[nbChar]='\0';
     /*
     StructMessage msg;
     int ret = sread(0, msg.messageText, MAX_LENGTH);

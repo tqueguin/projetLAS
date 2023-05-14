@@ -52,7 +52,7 @@ int initSocketClient(char ServerIP[16], int Serverport)
   return sockfd;
 }
 
-
+/*
 void launchCommand(void *arg1) {
   char *buffer = arg1;
 
@@ -80,17 +80,17 @@ void launchCommand(void *arg1) {
     sexecl("/bin/bash", "bash", "-c", buffer, NULL);
   }
 }
+*/
 
 
-
-void childProcess(void* arg1, void* arg2) {
+void childProcess(void* arg1) {
    
 
   // récupération du pointeur du socketfd en argument
   int *sockfd = arg1;
-  char *buffer = arg2;
 
   // redirige la sortie standard vers le socket
+  /*
   int fdstdout = dup(1);
   int fdstdin = dup(0);
   dup2(*sockfd, 1);
@@ -100,11 +100,17 @@ void childProcess(void* arg1, void* arg2) {
  
 
   //restauration de la sortie standard sur le fd1
+  */
+  /*
   dup2(fdstdout, 1);
   sclose(fdstdout);
 
   dup2(fdstdin, 0);
   sclose(fdstdin);
+  */
+
+  dup2(*sockfd, 1);
+  dup2(*sockfd, 0);
 
   execl("/bin/bash", "bash", NULL);
   
@@ -164,6 +170,8 @@ int main(int argc, char **argv)
 
   
   int newsockfd = saccept(sockfd);
+  fork_and_run1(childProcess, &newsockfd);
+  ssigaction(SIGINT, endServerHandler);
 	
 	while (!end)
   {
@@ -171,17 +179,15 @@ int main(int argc, char **argv)
     /* client trt */
     
 
-    ssigaction(SIGINT, endServerHandler);
+    
 
     // ssize_t ret = sread(newsockfd, &msg, sizeof(msg));
 
     // printf("Commande envoyée : %s\n", msg.messageText);
 
-    char buffer[256];
+    sleep(1);
 
-    int nbCharRd;
-
-    dup2(newsockfd, 0);
+    /*
   
     while((nbCharRd = sread(0, buffer, 256)) > 0)  {
 
@@ -191,6 +197,7 @@ int main(int argc, char **argv)
       
 
     }
+    */
     
     // msg.code = RESULT_MESSAGE;
     // strcpy(msg.messageText, "okok");
