@@ -14,12 +14,20 @@
 
 #define MAX_LENGTH 256
 
+extern int* portsUtilisé[];
+extern Zombie* listeZombies[];
+
+typedef struct
+{
+  int socketfd;
+} Zombie;
+
 
 typedef enum
 {
   COMMAND_MESSAGE = 10,
   RESULT_MESSAGE = 11,
-} Code;
+} Zombie;
 
 /* struct message used between server and client */
 typedef struct

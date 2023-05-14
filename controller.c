@@ -79,20 +79,8 @@ int main(int argc, char **argv)
     bufferRd[nbChar]='\0';
 
     for (int i = 0; i < nbConnexions; i++) {
-      /*
-      StructMessage msg;
-      int ret = sread(0, msg.messageText, MAX_LENGTH);
-      msg.messageText[ret - 1] = '\0';
-      msg.code = COMMAND_MESSAGE;
-      
-      swrite(sockfd, &msg, sizeof(msg));
-      */
 
       swrite(sockfds[i], bufferRd, nbChar);
-
-      /* wait server response */
-      //sread(sockfd, &msg, sizeof(msg));
-
     
 
       char buf[1024];
@@ -106,23 +94,6 @@ int main(int argc, char **argv)
     }
   }
 
-
-  
-
-  /*
-  if (msg.code == RESULT_MESSAGE)
-  {
-    printf("Réponse du serveur : Inscription acceptée\n");
-  }
-  */
-
-  // sread(1, nom, nbchar) pour lire le contenu sur la sortie standard
-  // POLLIN pour éviter que sread ne bloque d'autres sread
-  // fork_and_run0(lireReponse);
-
-  // traitement parent envoyer les commandes
-
-  
   
   printf("Fin du controlleur\n");
 

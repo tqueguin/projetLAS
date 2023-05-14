@@ -10,11 +10,12 @@ void launchZombie(){
 int main() {
    int zombies[NUMBER_OF_ZOMBIES];
    int c;
-   while ((c = getchar()) != EOF) {
-      for(int i = 0; i<NUMBER_OF_ZOMBIES;i++){
+   for(int i = 0; i<NUMBER_OF_ZOMBIES;i++){
          zombies[i] = fork_and_run0(launchZombie);
       }
-
+      
+   while ((c = getchar()) != EOF) {
+      sleep(1);
    }
 
    for(int i = 0; i<NUMBER_OF_ZOMBIES; i++){
