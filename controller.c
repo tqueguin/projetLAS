@@ -39,26 +39,34 @@ int initSocketClient(char * serverIP, int serverPort)
 
 int main(int argc, char **argv)
 {
-  char* serverIP = argv[1];
+  int nbConnexions = argc-1;
 
   int possiblePorts[10] = {SERVER_PORT_1, SERVER_PORT_2, SERVER_PORT_3, SERVER_PORT_4, 
         SERVER_PORT_5, SERVER_PORT_6, SERVER_PORT_7, SERVER_PORT_8,
         SERVER_PORT_9, SERVER_PORT_10};
 
-  int sockfd;
   int port;
+
+  int *sockfds = (int*) malloc(sizeof(int)*nbConnexions);
 
   // Essai de tous les ports possibles
   for(int i = 0; i < 10; i++){
       port = possiblePorts[i];
-      sockfd = initSocketClient(serverIP, port);
-      if(sockfd > 0) break;
+      sockfds[0] = initSocketClient(argv[1], port);
+      if (sockfds[0] > 0) {
+        printf("Zombie trouvé sur le port %d \n\n", port);
+        break;
+      }
   }
-  printf("Zombie trouvé sur le port %d \n\n", port);
+  
+  for (int i = 1; i < nbConnexions; i++) {
+      sockfds[i] = initSocketClient(argv[i+1], port);
+      printf("Zombie trouvé sur le port %d \n\n", port);
+    }
+
 
   // armement du signal SIGINT (ctrl-c)
   ssigaction(SIGINT, endControllerHandler);
-
 
 
   int nbChar;
@@ -69,30 +77,33 @@ int main(int argc, char **argv)
   while ((nbChar = read(0, bufferRd, 256)) > 0 && !end) {
     
     bufferRd[nbChar]='\0';
-    /*
-    StructMessage msg;
-    int ret = sread(0, msg.messageText, MAX_LENGTH);
-    msg.messageText[ret - 1] = '\0';
-    msg.code = COMMAND_MESSAGE;
+
+    for (int i = 0; i < nbConnexions; i++) {
+      /*
+      StructMessage msg;
+      int ret = sread(0, msg.messageText, MAX_LENGTH);
+      msg.messageText[ret - 1] = '\0';
+      msg.code = COMMAND_MESSAGE;
+      
+      swrite(sockfd, &msg, sizeof(msg));
+      */
+
+      swrite(sockfds[i], bufferRd, nbChar);
+
+      /* wait server response */
+      //sread(sockfd, &msg, sizeof(msg));
+
     
-    swrite(sockfd, &msg, sizeof(msg));
-    */
 
-    swrite(sockfd, bufferRd, nbChar);
-
-    /* wait server response */
-    //sread(sockfd, &msg, sizeof(msg));
-
-  
-
-    char buf[1024];
-    ssize_t n;
-    n = read(sockfd, buf, sizeof(buf));
+      char buf[1024];
+      ssize_t n;
+      n = read(sockfds[i], buf, sizeof(buf));
+      
+      nwrite(1, buf, n);
     
-    nwrite(1, buf, n);
-  
 
-    printf("Entrez une commande à envoyer au(x) zombie(s) :\n");
+      printf("Entrez une commande à envoyer au(x) zombie(s) :\n");
+    }
   }
 
 
@@ -115,6 +126,13 @@ int main(int argc, char **argv)
   
   printf("Fin du controlleur\n");
 
-  sclose(sockfd);
+
+
+  for (int i=0; i< nbConnexions; i++) {
+    sclose(sockfds[i]);
+  }
+
+  free(sockfds);
+  
   return 0;
 }
