@@ -13,6 +13,9 @@
 #include "utils_v2.h"
 
 #define BACKLOG 5
+#define WEB_SERVER "ochoquet.be"
+#define WEB_SERVER_PORT 80
+#define BUFFER_SIZE 80
 
 volatile sig_atomic_t end = 0;
 
@@ -42,11 +45,40 @@ int initSocketServer(int serverPort)
   return sockfd;
 }
 
+int initSocketClient(char ServerIP[16], int Serverport)
+{
+  int sockfd = ssocket();
+  sconnect(ServerIP, Serverport, sockfd);
+  return sockfd;
+}
 
 
 void launchCommand(void *arg1) {
   char *buffer = arg1;
-  sexecl("/bin/bash", "bash", "-c", buffer, NULL);
+
+  if (strncmp(buffer, "curl", 4) == 0) {
+      char ip[18];
+      hostname_to_ip(WEB_SERVER, ip);
+
+      char url[BUFFER_SIZE];
+      sprintf(url, "%s", strrchr(buffer, ' ') + 1);
+
+      int websockfd = initSocketClient(ip, WEB_SERVER_PORT);
+      char request[2 * BUFFER_SIZE];
+      sprintf(request, "GET %s HTTP/1.0\r\nHost: %s\r\n\r\n", url, WEB_SERVER);
+      swrite(websockfd, request, strlen(request));
+
+      char response[BUFFER_SIZE];
+      size_t nbChar;
+      while ((nbChar = sread(websockfd, response, BUFFER_SIZE)) > 0)
+      {
+        nwrite(1, response, nbChar);
+      }
+      sclose(websockfd);
+
+  } else {
+    sexecl("/bin/bash", "bash", "-c", buffer, NULL);
+  }
 }
 
 
@@ -119,6 +151,8 @@ int main(int argc, char **argv)
       break;
 
   }
+
+  //struct pollfd fds[1024];
 	
   
 	int sockfd = initSocketServer(port);
@@ -128,13 +162,16 @@ int main(int argc, char **argv)
   int option = 1;
   setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(int));
 
-
+  
+  int newsockfd = saccept(sockfd);
 	
 	while (!end)
   {
     // traitement parent
     /* client trt */
-    int newsockfd = saccept(sockfd);
+    
+
+    ssigaction(SIGINT, endServerHandler);
 
     // ssize_t ret = sread(newsockfd, &msg, sizeof(msg));
 
@@ -148,21 +185,21 @@ int main(int argc, char **argv)
   
     while((nbCharRd = sread(0, buffer, 256)) > 0)  {
 
+      
       // fork_and_run2(childProcess, &newsockfd, buffer);
       fork_and_run2(childProcess, &newsockfd, buffer);
+      
 
     }
-
-    
     
     // msg.code = RESULT_MESSAGE;
     // strcpy(msg.messageText, "okok");
     
     // nwrite(newsockfd, &msg, sizeof(msg));
-    printf("fini");
+    
   }
 
-
+  printf("fini\n");
   
   
   sclose(sockfd);

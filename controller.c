@@ -113,7 +113,7 @@ int main(int argc, char **argv)
 
   
   
-  printf("Fin du controlleur");
+  printf("Fin du controlleur\n");
 
   sclose(sockfd);
   return 0;
